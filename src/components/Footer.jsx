@@ -6,7 +6,7 @@ import "./stars.scss"
 
 const Footer = () => {
     return (
-        <>
+        // <>
         <Wrapper>
   
           <footer>
@@ -43,12 +43,13 @@ const Footer = () => {
             </div>
           </footer>
         </Wrapper>
-      </>
+      // </>
     );
   };
   
   const Wrapper = styled.section`
     footer {
+      bottom: 0;
       padding: 4rem 0 4rem 0;
       background-color: ${({ theme }) => theme.colors.footer_bg};
       h3 {

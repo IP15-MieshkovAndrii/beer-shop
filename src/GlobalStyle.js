@@ -21,8 +21,10 @@ html {
 body {
   overflow-x: hidden;
   background: ${({ theme }) => theme.colors.bgS};
-   scrollbar-color: rgb(98 84 243);
-    scrollbar-width: thin;
+  scrollbar-color: rgb(98 84 243);
+  scrollbar-width: thin;
+  margin: 0;
+  padding: 0;
 }
 
 body::-webkit-scrollbar {
@@ -184,5 +186,6 @@ input, textarea{
           grid-template-columns: 1fr;
         }
     }
+
 
 `;
