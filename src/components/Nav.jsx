@@ -4,14 +4,14 @@ import styled from "styled-components";
 import { FaBeer } from "react-icons/fa";
 import { CgMenu, CgClose } from "react-icons/cg";
 import { useCartContext } from "../context/cartContext";
-import { useAuth0 } from "@auth0/auth0-react";
-import { Button } from "../styles/Button";
+// import { useAuth0 } from "@auth0/auth0-react";
+// import { Button } from "../styles/Button";
 
 
 const Nav = () => {
     const [menuIcon, setMenuIcon] = useState();
     const { totalItem } = useCartContext();
-    const {loginWithRedirect, logout, isAuthenticated, user} = useAuth0();
+    // const {loginWithRedirect, logout, isAuthenticated, user} = useAuth0();
 
     const Nav = styled.nav`
       .navbar-lists {
@@ -204,7 +204,7 @@ const Nav = () => {
                 Контакти
               </NavLink>
             </li>
-            {isAuthenticated && <h2>{user.name}</h2>}
+            {/* {isAuthenticated && <h2>{user.name}</h2>}
             {isAuthenticated ? (
               <li>
                 <Button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
@@ -217,7 +217,7 @@ const Nav = () => {
                   Вхід
                 </Button>
               </li>
-            )}
+            )} */}
             <li>
               <NavLink to="/cart" className="navbar-link cart-trolley--link">
                 <FaBeer className="cart-trolley" />

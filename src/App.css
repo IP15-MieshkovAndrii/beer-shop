@@ -6,6 +6,8 @@
   height: 40vmin;
   pointer-events: none;
   color: rgb(140, 154, 249);
+  background-color: #527eec;
+
 }
 
 @media (prefers-reduced-motion: no-preference) {

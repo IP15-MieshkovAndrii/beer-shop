@@ -45,6 +45,7 @@ const Cart = () => {
           </Button>
         </div>
         <div className="order-total--amount">
+          
           <div className="order-total--subdata">
             <div>
               <p>Вартість:</p>
@@ -67,6 +68,16 @@ const Cart = () => {
             </div>
           </div>
         </div>
+        <div className="cheak-out">
+        <NavLink to="/cheakout">
+          <Button 
+            className="btn btn-checkout"
+            // onClick={goToCheckout}
+          >
+              Оформити замовлення
+          </Button>
+        </NavLink>
+      </div>
       </div>
     </Wrapper>
   );
@@ -226,6 +237,16 @@ const Wrapper = styled.section`
     div p:last-child {
       font-weight: bold;
       color: ${({ theme }) => theme.colors.heading};
+    }
+  }
+
+  .cheak-out{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-end;
+    .btn-checkout {
+      background-color: #527eec;
     }
   }
 
