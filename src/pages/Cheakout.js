@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
 import { Form, Button } from 'semantic-ui-react';
 import 'react-phone-input-2/lib/style.css';
@@ -30,10 +30,11 @@ const Cheakout = () => {
     const { register, control, handleSubmit, formState: { errors } } = useForm()
     const inputRef = useRef(null);
     const navigate = useNavigate();
-    const {cart} = useCartContext();
+    const {cart, totalPrice} = useCartContext();
+    if(cart.length === 0)navigate('/cart');
     
     const onSubmit = (data) => {
-        console.log(data)
+        console.log(data, totalPrice)
     }
     const returnToCart = () => {
         navigate('/cart');
@@ -234,10 +235,15 @@ const Cheakout = () => {
                             <h4>{item.name}</h4>
                             <p>{item.amount * 0.5}л</p>
                         </div>
-                        <div className="price"></div>
+                        <div className="price">
+                            {item.price * item.amount}₴
+                        </div>
                     </div>
                     ))}
-                        <div className="items-amount"></div>
+                    </div>
+                    <div className="items-amount">
+                        <h4>Кінцева Вартість</h4>
+                        {totalPrice}₴
                     </div>
                 </div>
                 <div className="total"></div>
@@ -352,15 +358,19 @@ const Wrapper = styled.section`
             }
         }
         .cartItems{
+            position: fixed;
+            right:0%;
             padding: 2rem;
-            width:20%;
+            width:25%;
             background-color:white;
             margin: 2rem 5rem 2rem 0rem;
             min-height: 10%;
             text-align:center;
+            border: 1px solid black;
             .title{
                 text-align:center;
                 margin: 0 0 2rem 0;
+                border-bottom: 1px solid grey;
                 h3{
                     font-weight: 700;
                     font-size: 20px;
@@ -369,16 +379,46 @@ const Wrapper = styled.section`
             .cart{
                 color: black;
                 margin: 0 0 2rem 0;
+
                 .cartReturn{
                     font-size: 12px;
                     color:rgb(13, 63, 128);
                     z-index: 5;
                     cursor:pointer;
+                    margin: 0 0 2rem 0;
                 }
                 .items{
                     width:100%;
                     display:flex;
-                    justify-content:space-between;
+                    flex-direction:column;
+                    border-bottom: 1px solid grey;
+                    .cart-item{
+                        width:100%;
+                        display:flex;
+                        flex-direction:row;
+                        justify-content:space-between;
+                        .items-data{
+                            display:flex;
+                            flex-direction:column;
+                            text-align:left;
+                            h4{
+                                color: red;
+                                font-size: 11px;
+                            }
+                            p{
+                                color: grey;
+                                font-size: 9px;
+                            }
+                        }
+                        .price{
+                            font-size: 13px;
+                        }
+                    }
+                }
+                .items-amount{
+                    font-size: 15px;
+                    padding:1rem;
+                    padding-bottom:0;
                 }
             }
             
