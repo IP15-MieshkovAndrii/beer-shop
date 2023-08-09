@@ -7,7 +7,9 @@ import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
 import "react-datepicker/dist/react-datepicker.css";
 import { Controller, useForm } from 'react-hook-form'
-import { commerce } from "../lib/commerce";
+import { useNavigate } from "react-router-dom";
+import { useCartContext } from "../context/cartContext";
+
 
 // const PhoneInputWrapper = ({ field}) => {
 //     return (
@@ -27,11 +29,15 @@ import { commerce } from "../lib/commerce";
 const Cheakout = () => {
     const { register, control, handleSubmit, formState: { errors } } = useForm()
     const inputRef = useRef(null);
+    const navigate = useNavigate();
+    const {cart} = useCartContext();
     
     const onSubmit = (data) => {
         console.log(data)
     }
-
+    const returnToCart = () => {
+        navigate('/cart');
+    }
 
 
     return (
@@ -39,12 +45,6 @@ const Cheakout = () => {
             <Form className='checkout-form' onSubmit={handleSubmit(onSubmit)}>
                 <h1>Ваші контактні дані</h1>
                 <Form.Group className='form-group' >
-                    {/* <Form.Input
-                        className="form-half"
-                        label='Прізвище'
-                        placeholder='ШЕВЧЕНКО'
-                        {...register("lastname", {required: true, maxLength: 20})}
-                    /> */}
 
                     <Form.Field className="form-half">
                         <label>Прізвище</label>
@@ -84,26 +84,6 @@ const Cheakout = () => {
                             <p className="ui negative mini message">Введіть дійсну адресу електронної пошти</p>
                         }
                     </Form.Field>
-                    {/* <Form.Field className="form-half">
-                        <label>Телефон</label>
-                        <PhoneInput
-                            country={'ua'}
-                            enableAreaCodes={true}
-                            placeholder='Введіть номер телефону'
-                            inputStyle={{ width: '100%' }}
-                            inputProps={{
-                                autoComplete: 'off', 
-                            }}
-                            onChange={(value) => {
-                                if (value.length>11)setPhoneNumber(value)
-                                else setPhoneNumber('zero')
-                            }}
-                            {...register("numberPhone", {required: false})}
-                        />
-                        {phoneNumber === 'zero' && (
-                            <p className="ui negative mini message">Це обов’язкове поле</p>
-                        )}
-                    </Form.Field> */}
                     <Form.Field className="form-half">
                         <label>Телефон</label>
                         <Controller 
@@ -197,15 +177,6 @@ const Cheakout = () => {
                             <p className="ui negative mini message">Введіть коректний номер карти</p>
                         }
                     </Form.Field>
-                    {/* <Form.Input
-                        width={5}
-                        className="form-half"
-                        name='postal_billing_zip_code' 
-                        type='number'
-                        max='99999'
-                        label='Billing Zip' 
-                        placeholder='Введіть Zip code'
-                    /> */}
                 </Form.Group>
                 <Form.Group className='form-group payment'>
                     <Form.Field className="form-half-half">
@@ -248,102 +219,170 @@ const Cheakout = () => {
                         }
                     </Form.Field>
                 </Form.Group>
-                <Button type='submit'>Submit</Button>
+                <Button className="submitButton" type='submit'>Оплатити</Button>
             </Form>
-
+            <div className='cartItems'>
+                <div className="title">
+                    <h3>Поточний кошик</h3>
+                </div>
+                <div className="cart">
+                    <div className="cartReturn" onClick={returnToCart}>Повернутись до кошика</div>
+                    <div className="items">
+                    {cart.map((item, index) => (
+                    <div key={index} className="cart-item">
+                        <div className="items-data">
+                            <h4>{item.name}</h4>
+                            <p>{item.amount * 0.5}л</p>
+                        </div>
+                        <div className="price"></div>
+                    </div>
+                    ))}
+                        <div className="items-amount"></div>
+                    </div>
+                </div>
+                <div className="total"></div>
+            </div>
         </Wrapper>
     )
 }
 
 const Wrapper = styled.section`
-  .checkout-form {
-    background-color: #ffffff;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    margin: 5rem 20rem;
-    gap: 2rem;
-
-    h1{
-        color: #000;
-        font-size: 2.5rem;
-    }
-    .form-group {
+    display:flex;
+    flex-direction: row;
+    justify-content:space-between;
+    align-items: flex-start;
+    .checkout-form {
+        position: relative;
+        background-color: #ffffff;
+        padding: 2rem;
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 1rem;
-        .form-half{
-            width:50%
+        flex-direction: column;
+        width: 60%;
+        margin: 5rem 10rem;
+        gap: 2rem;
+
+        h1{
+            color: #000;
+            font-size: 2.5rem;
         }
-        .form-half-half{
-            width:25%
-        }
-        input {
-            width: 100%;
-            height: 4.5rem;
-        }
-    }
-
-    .payment{
-        justify-content: space-between;
-        width:50%;
-        gap: 1rem;
-
-        .form-third{
-            width:33%;
-        }
-    }
-
-    .payment-radio {
-        align-items: center;
-        margin-left: 0px !important;
-
-        label {
-            margin-right: 10px;
-        }
-    }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="radio"] {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        outline: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        border: 1px solid #999;
-        transition: border-color 0.2s ease-in-out;
-        margin-right: 5px;
-        padding:0;
-
-    }
-
-    input[type="radio"]:checked {
-        border-color: #000;
-        background-color: blue;
-    }
-
-
-    }
-
-    .ui.negative.mini.message {
-        background-color: #e74c3c; /* Red background color */
-        color: white; /* Text color */
-        padding: 8px; /* Padding around the message content */
-        border-radius: 4px; /* Rounded corners */
-        font-size: 12px; /* Font size */
-        text-align: center; /* Center-align the text */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+        .form-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 1rem;
+            .form-half{
+                width:50%
+            }
+            .form-half-half{
+                width:25%
+            }
+            input {
+                width: 100%;
+                height: 4.5rem;
+            }
         }
 
-  
+        .payment{
+            justify-content: space-between;
+            width:50%;
+            gap: 1rem;
 
+            .form-third{
+                width:33%;
+            }
+        }
+
+        .payment-radio {
+            align-items: center;
+            margin-left: 0px !important;
+
+            label {
+                margin-right: 10px;
+            }
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            outline: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #999;
+            transition: border-color 0.2s ease-in-out;
+            margin-right: 5px;
+            padding:0;
+
+        }
+
+        input[type="radio"]:checked {
+            border-color: #000;
+            background-color: blue;
+        }
+
+
+        }
+
+        .ui.negative.mini.message {
+            background-color: #e74c3c; /* Red background color */
+            color: white; /* Text color */
+            padding: 8px; /* Padding around the message content */
+            border-radius: 4px; /* Rounded corners */
+            font-size: 12px; /* Font size */
+            text-align: center; /* Center-align the text */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+            }
+
+        .submitButton{
+            width: 20%;
+            background-color: rgb(40, 249, 127);
+            border: none;
+            color: black;
+            cursor:pointer;
+            padding: 0% 2%;
+            border: 2px solid black;
+            :hover, :active{
+                background-color: rgba(24, 169, 85, 0.766);
+            }
+        }
+        .cartItems{
+            padding: 2rem;
+            width:20%;
+            background-color:white;
+            margin: 2rem 5rem 2rem 0rem;
+            min-height: 10%;
+            text-align:center;
+            .title{
+                text-align:center;
+                margin: 0 0 2rem 0;
+                h3{
+                    font-weight: 700;
+                    font-size: 20px;
+                }
+            }
+            .cart{
+                color: black;
+                margin: 0 0 2rem 0;
+                .cartReturn{
+                    font-size: 12px;
+                    color:rgb(13, 63, 128);
+                    z-index: 5;
+                    cursor:pointer;
+                }
+                .items{
+                    width:100%;
+                    display:flex;
+                    justify-content:space-between;
+                }
+            }
+            
+        }
 
   `
 

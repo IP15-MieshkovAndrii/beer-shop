@@ -5,7 +5,7 @@ const CartContext = createContext();
 
 const getLocaleCartData = () => {
   let newCartData = localStorage.getItem("beerCart");
-  if(newCartData === []){
+  if(!newCartData){
     return []
   } else {
     return JSON.parse(newCartData);
