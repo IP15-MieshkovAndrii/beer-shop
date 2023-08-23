@@ -12,6 +12,7 @@ import { ThemeProvider } from "styled-components";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Cheakout from "./pages/Cheakout";
+import Callback from "./pages/Callback";
 
 const App = () => {
 
@@ -57,6 +58,7 @@ const App = () => {
           <Route path="/singleproduct/:id" element={<SingleProduct/>}/>
           <Route path="/cart" element={<Cart/>}/>
           <Route path="/cheakout" element={<Cheakout/>}/>
+          <Route path="/callback" element={<Callback/>}/>
           <Route path="*" element={<ErrorPage/>}/>
         </Routes>
         <Footer/>

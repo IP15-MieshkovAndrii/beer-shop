@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import React, { useRef } from "react";
+import React, { useRef, useState} from "react";
 import styled from "styled-components";
 import { Form, Button } from 'semantic-ui-react';
 import 'react-phone-input-2/lib/style.css';
@@ -9,22 +9,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from "react-router-dom";
 import { useCartContext } from "../context/cartContext";
+import {LiqPay} from "../payment/liqpay";
 
+const payment = new LiqPay('sandbox_i3877493362', 'sandbox_cz5z0KfADUcCRcRpYNpbToMcXMkDbAZDs4Fvg2Nh')
 
-// const PhoneInputWrapper = ({ field}) => {
-//     return (
-//       <PhoneInput
-//         {...field}
-//         country={'ua'}
-//         enableAreaCodes={true}
-//         placeholder='Введіть номер телефону'
-//         inputStyle={{ width: '100%' }}
-//         inputProps={{
-//           autoComplete: 'off', 
-//         }}
-//       />
-//     );
-//   }
 
 const Cheakout = () => {
     const { register, control, handleSubmit, formState: { errors } } = useForm()
@@ -32,9 +20,37 @@ const Cheakout = () => {
     const navigate = useNavigate();
     const {cart, totalPrice} = useCartContext();
     if(cart.length === 0)navigate('/cart');
-    
+    const [newData, setNewData] = useState(0);
+    const [newForm, setNewFrom] = useState(0);
+
+
     const onSubmit = (data) => {
-        console.log(data, totalPrice)
+        const callbackurl = window.location.origin + '/callback';
+        const itemsCart = cart.map((item)=>({
+            amount: item.amount,
+            price: item.price,
+            cost: item.amount * item.price,
+            id: item.id,
+            name: item.name,
+        }))
+        const paymentData = {
+            language: 'en',
+            amount: totalPrice,
+            currency: 'UAH',
+            description: JSON.stringify(data)+JSON.stringify(itemsCart),
+            rro_info: {
+                items: itemsCart
+            },
+            action: 'pay',
+            version: '3',
+            order_id: Math.random()*999,
+            public_key:'sandbox_i3877493362',
+            result_url: callbackurl,
+        }
+        setNewData(paymentData)
+        setNewFrom(payment.cnb_form(paymentData))
+
+
     }
     const returnToCart = () => {
         navigate('/cart');
@@ -143,84 +159,7 @@ const Cheakout = () => {
                         />
                     </Form.Field>
                 </Form.Group>
-                <h1>Оплата</h1>
-                <Form.Group className="payment-radio">
-                    <input
-                        name='gateway' 
-                        type='radio'
-                        value='test_gateway'
-                        {...register("payment", { required: true })}
-                    />
-                    <label htmlFor="test_gateway">Test Gateway</label>
-                    <input
-                        name='gateway' 
-                        type='radio'
-                        value='stripe'
-                        defaultChecked="true"
-                        {...register("payment", { required: true })}
-                    />
-                    <label htmlFor="stripe">Кредитна картка</label>
-                </Form.Group>
-                <Form.Group className='form-group payment'>
-                    <Form.Field className="form-half">
-                        <label>Номер кредитної карти</label>
-                        <input
-                            id="ccn"
-                            type="tel"
-                            inputMode="numeric" 
-                            pattern="[0-9\s]{13,19}" 
-                            autoComplete="cc-number" 
-                            maxLength="16" 
-                            placeholder="0000111100001111"
-                            {...register("number", {required: true, minLength: 16})}
-                        />
-                        {errors.number && 
-                            <p className="ui negative mini message">Введіть коректний номер карти</p>
-                        }
-                    </Form.Field>
-                </Form.Group>
-                <Form.Group className='form-group payment'>
-                    <Form.Field className="form-half-half">
-                        <label>ММ</label>
-                        <input
-                            type="text"
-                            pattern="^(0[1-9]|1[0-2])$"
-                            maxLength="2" 
-                            placeholder="09"
-                            {...register("month", {required: true, minLength: 2})}
-                        />
-                        {errors.month && 
-                            <p className="ui negative mini message">Введіть коректне число</p>
-                        }
-                    </Form.Field>
-                    <Form.Field className="form-half-half">
-                        <label>РР</label>
-                        <input
-                            type="text"
-                            pattern="[0-9]{2}" 
-                            maxLength="2" 
-                            placeholder="23"
-                            {...register("year", {required: true, minLength: 2})}
-                        />
-                        {errors.year && 
-                            <p className="ui negative mini message">Введіть коректне число</p>
-                        }
-                    </Form.Field>
-                    <Form.Field className="form-third">
-                        <label>CVC</label>
-                        <input
-                            type="text"
-                            pattern="[0-9]{3}" 
-                            maxLength="3" 
-                            placeholder="123"
-                            {...register("cvc", {required: true, minLength: 3})}
-                        />
-                        {errors.cvc && 
-                            <p className="ui negative mini message">Введіть коректне число</p>
-                        }
-                    </Form.Field>
-                </Form.Group>
-                <Button className="submitButton" type='submit'>Оплатити</Button>
+                <Button className="submitButton" type='submit'>Підтвердити платіж</Button>
             </Form>
             <div className='cartItems'>
                 <div className="title">
@@ -247,7 +186,11 @@ const Cheakout = () => {
                     </div>
                 </div>
                 <div className="total"></div>
+                <div className="paymentButton" style={{ display: !newData ? 'none' : 'block' }}>
+                    {newData ? <div dangerouslySetInnerHTML={{ __html: newForm }}/> : ''}
+                </div> 
             </div>
+
         </Wrapper>
     )
 }
@@ -257,6 +200,12 @@ const Wrapper = styled.section`
     flex-direction: row;
     justify-content:space-between;
     align-items: flex-start;
+    .paymentButton{
+        position:relative;
+        input[type="image"]{
+            z-index: 20;
+        }
+    }
     .checkout-form {
         position: relative;
         background-color: #ffffff;
@@ -288,49 +237,12 @@ const Wrapper = styled.section`
             }
         }
 
-        .payment{
-            justify-content: space-between;
-            width:50%;
-            gap: 1rem;
-
-            .form-third{
-                width:33%;
-            }
-        }
-
-        .payment-radio {
-            align-items: center;
-            margin-left: 0px !important;
-
-            label {
-                margin-right: 10px;
-            }
-        }
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
-        input[type="radio"] {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            outline: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 1px solid #999;
-            transition: border-color 0.2s ease-in-out;
-            margin-right: 5px;
-            padding:0;
-
-        }
-
-        input[type="radio"]:checked {
-            border-color: #000;
-            background-color: blue;
-        }
 
 
         }
@@ -346,7 +258,7 @@ const Wrapper = styled.section`
             }
 
         .submitButton{
-            width: 20%;
+            width: 30%;
             background-color: rgb(40, 249, 127);
             border: none;
             color: black;
