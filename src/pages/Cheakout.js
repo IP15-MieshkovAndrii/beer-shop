@@ -10,6 +10,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from "react-router-dom";
 import { useCartContext } from "../context/cartContext";
 import {LiqPay} from "../payment/liqpay";
+import { commerce } from "../lib/commerce";
 
 const payment = new LiqPay('sandbox_i3877493362', 'sandbox_cz5z0KfADUcCRcRpYNpbToMcXMkDbAZDs4Fvg2Nh')
 
@@ -23,11 +24,55 @@ const Cheakout = () => {
     const [newData, setNewData] = useState(0);
     const [newForm, setNewFrom] = useState(0);
 
+    const addItemsToCart = async (items) => {
+        try {
+            await commerce.cart.empty();
+            for (const cartItem of items) {
+                await commerce.cart.add(cartItem.id, cartItem.amount)
+            }
+        } catch (error) {
+            console.error(`Error adding items to the cart: ${error.message}`);
+        }
+    };
+    
+    const createOrder = async (customerData, shippingData) => {
+        try {
+            const cartId = commerce.cart.id();
+            
+            const token = await commerce.checkout.generateToken(cartId, { type: 'cart' });
+            
+            const order = await commerce.checkout.capture(token.id, {
+                customer: {
+                    firstname: customerData.firstname,
+                    lastname: customerData.lastname,
+                    email: customerData.email,
+                    phone: customerData.numberPhone
+                },
+                shipping: {
+                    street: shippingData.street + ", будинок " + shippingData.house + ', квартира ' + shippingData.apartment,
+                },
+                "billing": [],
+                payment: {
+                    gateway: 'test_gateway',
+                    card: {
+                        number: '4242424242424242',
+                        expiry_month: '02',
+                        expiry_year: '24',
+                        cvc: '123',
+                        postal_zip_code: '94107',
+                    }
+                },
+            });
+            console.log('Order created successfully:', order);
+        } catch (error) {
+            console.error('Error creating order:', error.message);
+        }
+    };
 
     const onSubmit = (data) => {
         const callbackurl = window.location.origin + '/callback';
         const itemsCart = cart.map((item)=>({
-            amount: item.amount,
+            quantity: item.amount,
             price: item.price,
             cost: item.amount * item.price,
             id: item.id,
@@ -37,7 +82,7 @@ const Cheakout = () => {
             language: 'en',
             amount: totalPrice,
             currency: 'UAH',
-            description: JSON.stringify(data)+JSON.stringify(itemsCart),
+            description: 'Bear payment',
             rro_info: {
                 items: itemsCart
             },
@@ -47,8 +92,12 @@ const Cheakout = () => {
             public_key:'sandbox_i3877493362',
             result_url: callbackurl,
         }
+
+        addItemsToCart(cart);
+        createOrder(data, data);
         setNewData(paymentData)
         setNewFrom(payment.cnb_form(paymentData))
+
 
 
     }
@@ -159,7 +208,7 @@ const Cheakout = () => {
                         />
                     </Form.Field>
                 </Form.Group>
-                <Button className="submitButton" type='submit'>Підтвердити платіж</Button>
+                <Button className="submitButton" disabled={newData!==0} type='submit'>Підтвердити платіж</Button>
             </Form>
             <div className='cartItems'>
                 <div className="title">
